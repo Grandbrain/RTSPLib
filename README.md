@@ -1,27 +1,25 @@
-[![GitHub release](https://img.shields.io/github/release/Grandbrain/StdEx.svg)](https://github.com/Grandbrain/StdEx/releases)
-[![GitHub issues](https://img.shields.io/github/issues/Grandbrain/StdEx.svg)](https://github.com/Grandbrain/StdEx/issues)
-[![GitHub forks](https://img.shields.io/github/forks/Grandbrain/StdEx.svg)](https://github.com/Grandbrain/StdEx/network/members)
-[![GitHub stars](https://img.shields.io/github/stars/Grandbrain/StdEx.svg)](https://github.com/Grandbrain/StdEx/stargazers)
-[![GitHub license](https://img.shields.io/github/license/Grandbrain/StdEx.svg)](https://github.com/Grandbrain/StdEx/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/Grandbrain/RTSPLib.svg)](https://github.com/Grandbrain/RTSPLib/releases)
+[![GitHub issues](https://img.shields.io/github/issues/Grandbrain/RTSPLib.svg)](https://github.com/Grandbrain/RTSPLib/issues)
+[![GitHub forks](https://img.shields.io/github/forks/Grandbrain/RTSPLib.svg)](https://github.com/Grandbrain/RTSPLib/network/members)
+[![GitHub stars](https://img.shields.io/github/stars/Grandbrain/RTSPLib.svg)](https://github.com/Grandbrain/RTSPLib/stargazers)
+[![GitHub license](https://img.shields.io/github/license/Grandbrain/RTSPLib.svg)](https://github.com/Grandbrain/RTSPLib/blob/master/LICENSE)
 
-# Welcome to StdEx project!
+# Welcome to RTSPLib project!
 
-[StdEx](https://github.com/Grandbrain/StdEx) is an extension of the standard C++ library with the useful classes and functions. This library includes powerful and lightweight classes and functions to simplify the development of complex projects. The library uses the new features of modern C++ standards and can be used with most modern compilers.
+[RTSPLib](https://github.com/Grandbrain/RTSPLib) is a C++ RTSP client (server) implementation based on Qt framework.
+
 
 ## Contribute
 
-There are several ways to contribute to StdEx project:
-* [Submit bugs](https://github.com/Grandbrain/StdEx/issues) and help me verify fixes.
-* Review the [source code changes](https://github.com/Grandbrain/StdEx/pulls).
+There are several ways to contribute to RTSPLib project:
+* [Submit bugs](https://github.com/Grandbrain/RTSPLib/issues) and help me verify fixes.
+* Review the [source code changes](https://github.com/Grandbrain/RTSPLib/pulls).
 
 
 ## Building
 
-* Download and extract the [latest release](https://github.com/Grandbrain/StdEx/releases) of the source code.
-* Include the `Source` directory in your project.
-* Build test files with CMake to run unit tests.
+* Download and extract the [latest release](https://github.com/Grandbrain/RTSPLib/releases) of the source code.
 
 
 ## Usage
 
-* Use this header-only library to improve your projects.

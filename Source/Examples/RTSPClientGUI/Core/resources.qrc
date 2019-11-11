@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file alias="fs.glsl">resources/shaders/fs.glsl</file>
+        <file alias="vs.glsl">resources/shaders/vs.glsl</file>
+    </qresource>
+    <qresource prefix="/images">
+        <file alias="qt.png">resources/images/qt.png</file>
+    </qresource>
+</RCC>

@@ -24,6 +24,7 @@
 *.creator.user*
 *creator.user*
 *build-*
+*[Bb]uild*
 *_plugin_import.cpp
 Makefile*
 target_wrapper.*
@@ -37,4 +38,3 @@ object_script.*.Debug
 compile_commands.json
 /.qmake.cache
 /.qmake.stash
-
