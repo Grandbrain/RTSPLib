@@ -78,6 +78,10 @@ namespace Player {
 			glEnable(GL_CULL_FACE);
 		}
 
+		void PlaybackWidget::setImage(const QImage &image) {
+			colorTexture_.setData(image);
+		}
+
 		///
 		/// \details
 		void PlaybackWidget::paintGL() {
@@ -94,7 +98,9 @@ namespace Player {
 				transformMatrix.ortho(-1.0f, +1.0f, +1.0f, -1.0f, 0.0f, 10.0f);
 
 				shaderProgram_.setUniformValue(MATRIX_UNIFORM, transformMatrix);
-				colorTexture_.bind();
+
+				if (colorTexture_.isCreated())
+					colorTexture_.bind();
 
 				glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 			}
@@ -124,7 +130,6 @@ namespace Player {
 			}
 
 			vertexBuffer_.allocate(VIEWPORT_VERTICES, sizeof(VIEWPORT_VERTICES));
-			colorTexture_.setData(QImage(":/images/qt.png"));
 
 			shaderProgram_.enableAttributeArray(VERTEX_COORDINATE_ATTRIBUTE);
 			shaderProgram_.enableAttributeArray(TEXTURE_COORDINATE_ATTRIBUTE);
@@ -155,8 +160,11 @@ namespace Player {
 			vertexBuffer_.release();
 			vertexBuffer_.destroy();
 
-			colorTexture_.release();
-			colorTexture_.destroy();
+			if (colorTexture_.isCreated() && colorTexture_.isBound())
+				colorTexture_.release();
+
+			if (colorTexture_.isCreated())
+				colorTexture_.destroy();
 
 			shaderProgram_.release();
 			shaderProgram_.removeAllShaders();

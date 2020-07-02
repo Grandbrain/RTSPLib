@@ -1,12 +1,12 @@
-/// \file RTSP.hpp
+/// \file AbstractRTSPClientBase.hpp
 /// \brief Contains classes and functions declarations that provide Real Time
-/// Streaming Protocol (RTSP) implementation.
+/// Streaming Protocol (RTSP) abstract base client implementation.
 /// \bug No known bugs.
 
-#ifndef RTSP_HPP
-#define RTSP_HPP
+#ifndef ABSTRACTRTSPCLIENTBASE_HPP
+#define ABSTRACTRTSPCLIENTBASE_HPP
 
-#include "SDP.hpp"
+#include "AbstractRTSPClient.hpp"
 
 #include <curl.h>
 
@@ -18,65 +18,10 @@ namespace RTSPLib {
 	/// Protocol (RTSP) client library.
 	namespace RTSPClient {
 
-		///
-		enum class RTSPStatusCode {
-			Error								=	0	,
-			Continue							=	100	,
-			Ok									=	200	,
-			Created								=	201	,
-			LowOnStorageSpace					=	250	,
-			MultipleChoices						=	300	,
-			MovedPermanently					=	301	,
-			Found								=	302	,
-			SeeOther							=	303	,
-			NotModified							=	304	,
-			UseProxy							=	305	,
-			BadRequest							=	400	,
-			Unauthorized						=	401	,
-			PaymentRequired						=	402	,
-			Forbidden							=	403	,
-			NotFound							=	404	,
-			MethodNotAllowed					=	405	,
-			NotAcceptable						=	406	,
-			ProxyAuthenticationRequired			=	407	,
-			RequestTimeOut						=	408	,
-			Gone								=	410	,
-			LengthRequired						=	411	,
-			PreconditionFailed					=	412	,
-			RequestMessageBodyTooLarge			=	413	,
-			RequestUriTooLarge					=	414	,
-			UnsupportedMediaType				=	415	,
-			ParameterNotUnderstood				=	451	,
-			Reserved							=	452	,
-			NotEnoughBandwidth					=	453	,
-			SessionNotFound						=	454	,
-			MethodNotValidInThisState			=	455	,
-			HeaderFieldNotValidForResource		=	456	,
-			InvalidRange						=	457	,
-			ParameterIsReadOnly					=	458	,
-			AggregateOpperationNotAllowed		=	459	,
-			OnlyAggregateOpperationAllowed		=	460	,
-			UnsupportedTransport				=	461	,
-			DestinationUnreachable				=	462	,
-			DestinationProhibited				=	463	,
-			DataTransportNotReadyYet			=	464	,
-			NotificationReasonUnknown			=	465	,
-			KeyManagementError					=	466	,
-			ConnectionAuthorizationRequired		=	470	,
-			ConnectionCredentialsNotAcception	=	471	,
-			FaulireToEstablishSecureConnection	=	472	,
-			InternalServerError					=	500	,
-			NotImplemented						=	501	,
-			BadGateway							=	502	,
-			ServiceUnavailable					=	503	,
-			GatewayTimeOut						=	504	,
-			RtspVersionNotSupported				=	505	,
-			OptionNotSupported					=	551
-		};
-
-		/// Class that provides Real Time Streaming Protocol (RTSP)
+		/// Class that provides Real Time Streaming Protocol (RTSP) base client
 		/// implementation.
-		class RTSP {
+		class RTSPClientBase {
+		private:
 
 			///
 			using callback_t = size_t(*)(char*, size_t, size_t, void*);
@@ -84,19 +29,19 @@ namespace RTSPLib {
 		public:
 
 			/// Default constructor.
-			explicit RTSP();
+			explicit RTSPClientBase();
 
 			/// Destructor.
-			virtual ~RTSP();
+			virtual ~RTSPClientBase();
 
 			/// Move constructor.
 			/// \param[in]	object	Object to move.
-			RTSP(RTSP&& object) = default;
+			RTSPClientBase(RTSPClientBase&& object) = default;
 
 			/// Move assignment operator,
 			/// \param[in]	object	Object to move.
 			/// \return This object.
-			RTSP& operator=(RTSP&& object) = default;
+			RTSPClientBase& operator=(RTSPClientBase&& object) = default;
 
 		public:
 
@@ -153,35 +98,39 @@ namespace RTSPLib {
 			);
 
 			/// Sends OPTIONS request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode OPTIONS();
 
 			/// Sends DESCRIBE request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode DESCRIBE();
 
 			/// Sends SETUP request.
-			/// \param[in]	path	Media track path.
-			/// \param[in]	ports	Client ports that receive RTP and RTCP data.
-			/// \return
-			RTSPStatusCode SETUP_UDP(const QByteArray& path,
-									 const QPair<quint16, quint16>& ports);
+			/// \param[in]	path		Media track path.
+			/// \param[in]	channels	Channels for RTP and RTCP data.
+			/// \return RTSP status code.
+			RTSPStatusCode SETUP(const QByteArray& path,
+								 const QPair<quint16, quint16>& channels);
 
 			/// Sends PLAY request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode PLAY();
 
 			/// Sends PAUSE request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode PAUSE();
 
 			/// Sends GET_PARAMETER request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode GET_PARAMETER();
 
 			/// Sends TEARDOWN request.
-			/// \return
+			/// \return RTSP status code.
 			RTSPStatusCode TEARDOWN();
+
+			///
+			/// \return
+			RTSPStatusCode RECEIVE();
 
 		private:
 
@@ -312,10 +261,21 @@ namespace RTSPLib {
 											   size_t size,
 											   void* user);
 
+			/// Performs an action when receiving RTSP interleaved data.
+			/// \param[in]	data	Data pointer.
+			/// \param[in]	n		Number of buffers.
+			/// \param[in]	size	Data size.
+			/// \param[in]	user	User-defined data.
+			/// \return Actual read size.
+			static size_t callbackDataInterleaved(char* data,
+												  size_t n,
+												  size_t size,
+												  void* user);
+
 		private:
 
 			///
-			struct RTSPPrivate final {
+			struct RTSPClientBasePrivate final {
 
 				/// Local libcurl context.
 				CURL* localContext_ { nullptr };

@@ -25,6 +25,8 @@ namespace RTSPLib {
 		RTSPConnectionParametes::RTSPConnectionParametes(
 			const QString& connectionUrl) {
 
+			setConnectionUrl(connectionUrl);
+			saveCredentials(connectionUrl);
 		}
 
 		///
@@ -37,7 +39,9 @@ namespace RTSPLib {
 			const QString& userName,
 			const QString& userPassword) {
 
-			setConnectionUrl(connectionUrl_);
+			setConnectionUrl(connectionUrl);
+			setUserName(userName);
+			setUserPassword(userPassword);
 		}
 
 		/// Destructor.
@@ -125,7 +129,75 @@ namespace RTSPLib {
 		void RTSPConnectionParametes::setConnectionUrl(
 			const QUrl& connectionUrl) {
 
-			connectionUrl_ = connectionUrl;
+			if (!connectionUrl.isValid() || connectionUrl.isRelative())
+				throw std::invalid_argument(
+					"Connection URL should be valid and absolute");
+
+			connectionUrl_ = connectionUrl.adjusted(
+				QUrl::RemoveScheme |
+				QUrl::RemoveAuthority
+			);
+
+			connectionUrl_.setScheme("rtsp");
+			connectionUrl_.setPort(554);
+		}
+
+		///
+		/// \details
+		/// \return
+		QString RTSPConnectionParametes::getUserAgent() const {
+			return userAgent_;
+		}
+
+		///
+		/// \details
+		/// \param[in]	userAgent
+		void RTSPConnectionParametes::setUserAgent(const QString& userAgent) {
+			userAgent_ = userAgent;
+		}
+
+		///
+		/// \details
+		/// \return
+		QString RTSPConnectionParametes::getUserName() const {
+			return userName_;
+		}
+
+		///
+		/// \details
+		/// \param[in]	userName
+		void RTSPConnectionParametes::setUserName(const QString& userName) {
+			userName_ = userName;
+		}
+
+		///
+		/// \details
+		/// \return
+		QString RTSPConnectionParametes::getUserPassword() const {
+			return userPassword_;
+		}
+
+		///
+		/// \details
+		/// \param[in]	userPassword
+		void RTSPConnectionParametes::setUserPassword(
+			const QString& userPassword) {
+
+			userPassword_ = userPassword;
+		}
+
+		///
+		/// \details
+		/// \param[in]	connectionUrl
+		void RTSPConnectionParametes::saveCredentials(
+			const QUrl& connectionUrl) {
+
+			auto userInfo = connectionUrl.userInfo().split(':');
+
+			if (userInfo.size() == 2) {
+				userName_ = userInfo.first();
+				userPassword_ = userInfo.last();
+			}
 		}
 	}
 }

@@ -12,11 +12,10 @@
 /// program.
 /// \return Exit status.
 int main(int argc, char *argv[]) {
-	Player::Playback::PlaybackInitializer::initialize();
-
 	QApplication app(argc, argv);
 
 	Window window;
+	window.initialize();
 	window.show();
 
 	return app.exec();

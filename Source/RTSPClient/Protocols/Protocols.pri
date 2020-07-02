@@ -1,13 +1,8 @@
 #------------------------------------------------------------------------------#
-#                             Project files settings                           #
+#                            Subdirectories settings                           #
 #------------------------------------------------------------------------------#
 
-HEADERS			+=															\
-						$$PWD/RTP.hpp										\
-						$$PWD/RTSP.hpp										\
-						$$PWD/SDP.hpp										\
-
-SOURCES			+=															\
-						$$PWD/RTP.cpp										\
-						$$PWD/RTSP.cpp										\
-						$$PWD/SDP.cpp										\
+include($$absolute_path(RTCP.pri, RTCP))
+include($$absolute_path(RTP.pri, RTP))
+include($$absolute_path(RTSP.pri, RTSP))
+#include($$absolute_path(SDP.pri, SDP))

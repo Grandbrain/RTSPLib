@@ -2,73 +2,72 @@
 #                                Base settings                                 #
 #------------------------------------------------------------------------------#
 
-QT				+=		widgets
 TEMPLATE		=		app
 TARGET			=		rtspclientgui
-CONFIG			+=		c11 c++11 strict_c strict_c++
-EXTERNAL_PATH	=		$$PWD/../../../External
+QT				+=		widgets network
+CONFIG			+=		c++17 strict_c++
 
 
 #------------------------------------------------------------------------------#
-#                              Project definitions                             #
+#                                Project macros                                #
 #------------------------------------------------------------------------------#
 
 DEFINES			+=															\
 						QT_DEPRECATED_WARNINGS								\
-
+						NETWORK_PROTOCOL_EXTENDED=0							\
 
 #------------------------------------------------------------------------------#
 #                            Project files settings                            #
 #------------------------------------------------------------------------------#
 
-include(Core/Core.pri)
-include(Decoders/Decoders.pri)
-include(Playback/Playback.pri)
+include($$absolute_path(Core.pri, Core))
+include($$absolute_path(Decoders.pri, Decoders))
+include($$absolute_path(Playback.pri, Playback))
+include($$absolute_path(Utilities.pri, Utilities))
+
+
+#------------------------------------------------------------------------------#
+#                            External dependencies                             #
+#------------------------------------------------------------------------------#
+
+CLIENT_TARGET		=	rtspclient
+CLIENT_DIRECTORY	=	RTSPClient
+CLIENT_INCLUDE_PATH	=	$$absolute_path($$CLIENT_DIRECTORY, $$SOURCE_PATH)
+CLIENT_LIBRARY_PATH	=	$$clean_path($$OUT_PWD/../../$$CLIENT_DIRECTORY)
+
+FFMPEG_DIRECTORY	=	$$find_directory($$EXTERNAL_PATH, "ffmpeg-*")
+FFMPEG_INCLUDE_PATH	=	$$find_include_path($$EXTERNAL_PATH, $$FFMPEG_DIRECTORY)
+FFMPEG_LIBRARY_PATH	=	$$find_library_path($$EXTERNAL_PATH, $$FFMPEG_DIRECTORY)
 
 
 #------------------------------------------------------------------------------#
 #                          Include directories settings                        #
 #------------------------------------------------------------------------------#
 
-INCLUDEPATH		+=															\
-						$$PWD/../../										\
-						$$PWD/../../RTSPClient								\
-						$$EXTERNAL_PATH/ffmpeg-4.2.0/include				\
+INCLUDEPATH			+=														\
+						$$CLIENT_INCLUDE_PATH								\
+						$$FFMPEG_INCLUDE_PATH								\
 
-DEPENDPATH		+=															\
-						$$PWD/../../										\
-						$$PWD/../../RTSPClient								\
-						$$EXTERNAL_PATH/ffmpeg-4.2.0/include				\
+
+DEPENDPATH			+=														\
+						$$CLIENT_INCLUDE_PATH								\
+						$$FFMPEG_INCLUDE_PATH								\
 
 
 #------------------------------------------------------------------------------#
 #                           External libraries settings                        #
 #------------------------------------------------------------------------------#
 
-LIBS			+=															\
-						-L$$OUT_PWD/../../RTSPClient/ -lrtspclient			\
+LIBS				+=														\
+						-L$$CLIENT_LIBRARY_PATH								\
+						-L$$FFMPEG_LIBRARY_PATH								\
 
-unix:!macx {
-	contains (QMAKE_HOST.arch, x86_64) {
-		CONFIG (debug, debug|release) {
-			LIBS		+=																\
-								-L$$EXTERNAL_PATH/ffmpeg-4.2.0/lib/linux/x64/debug/		\
-		}
-		else {
-			LIBS		+=																\
-								-L$$EXTERNAL_PATH/ffmpeg-4.2.0/lib/linux/x64/release/	\
-		}
-
-		LIBS		+=														\
-							-lavcodec										\
-							-lavdevice										\
-							-lavfilter										\
-							-lavformat										\
-							-lavutil										\
-							-lswresample									\
-							-lswscale										\
-	}
-	else {
-		error("Currently, the project cannot be built under 32-bit architecture.")
-	}
-}
+LIBS				+=														\
+						-l$$CLIENT_TARGET									\
+						-lavcodec											\
+						-lavdevice											\
+						-lavfilter											\
+						-lavformat											\
+						-lavutil											\
+						-lswresample										\
+						-lswscale											\

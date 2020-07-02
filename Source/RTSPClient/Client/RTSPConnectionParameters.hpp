@@ -96,6 +96,35 @@ namespace RTSPLib {
 			/// \param[in]	connectionUrl
 			void setConnectionUrl(const QUrl& connectionUrl);
 
+			///
+			/// \return
+			QString getUserAgent() const;
+
+			///
+			/// \param[in]	userAgent
+			void setUserAgent(const QString& userAgent);
+
+			///
+			/// \return
+			QString getUserName() const;
+
+			///
+			/// \param[in]	userName
+			void setUserName(const QString& userName);
+
+			///
+			/// \return
+			QString getUserPassword() const;
+
+			///
+			/// \param[in]	userPassword
+			void setUserPassword(const QString& userPassword);
+
+			///
+			/// \details
+			/// \param[in]	connectionUrl
+			void saveCredentials(const QUrl& connectionUrl);
+
 		private:
 
 			///

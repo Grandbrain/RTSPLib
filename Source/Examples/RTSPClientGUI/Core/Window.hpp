@@ -6,9 +6,14 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include <QMainWindow>
+#include "Decoders/VideoDecoder.hpp"
+#include "Playback/PlaybackVideo.hpp"
+#include "Utilities/NetworkStream.hpp"
 
-#include "Playback/PlaybackWidget.hpp"
+#include <QThread>
+#include <QMainWindow>
+#include <QUdpSocket>
+#include <QNetworkDatagram>
 
 ///
 namespace Ui {
@@ -34,17 +39,44 @@ public:
 public:
 
 	///
-	/// \retval true on success.
-	/// \retval false on error.
-	bool initialize();
+	void initialize();
+
+private slots:
 
 	///
-	void destroy();
+	void onDatagram();
+
+	///
+	/// \param[in]	image
+	void onFrames(const QImage& frame);
+
+signals:
+
+	///
+	/// \param[in]	data
+	void onExtradata(const QByteArray& data);
+
+	///
+	/// \param[in]	data
+	void onData(const QByteArray& data);
+
 
 private:
 
 	///
 	Ui::Window* ui_;
+
+	///
+	QUdpSocket socket_;
+
+	///
+	QThread thread_;
+
+	///
+	Decoders::VideoDecoder* decoder_;
+
+	///
+	Utilities::Streams::NetworkStream stream_;
 };
 
 #endif

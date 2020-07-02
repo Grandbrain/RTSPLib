@@ -2,68 +2,57 @@
 #                                Base settings                                 #
 #------------------------------------------------------------------------------#
 
-QT				-=		gui
-QT				+=		network
-TEMPLATE		=		lib
-TARGET			=		rtspclient
-CONFIG			+=		c11 c++11 strict_c strict_c++
-EXTERNAL_PATH	=		$$PWD/../../External
+TARGET				=	rtspclient
+TEMPLATE			=	lib
+QT					-=	gui
+QT					+=	network
+CONFIG				+=	c11 c++11 strict_c strict_c++
+DEFINES				+=	RTSPCLIENT_LIBRARY QT_DEPRECATED_WARNINGS
 
 
 #------------------------------------------------------------------------------#
-#                              Project definitions                             #
+#                            Subdirectories settings                           #
 #------------------------------------------------------------------------------#
 
-DEFINES			+=															\
-						RTSPCLIENT_LIBRARY									\
-						QT_DEPRECATED_WARNINGS								\
+include($$absolute_path(Base.pri, Base))
+include($$absolute_path(Client.pri, Client))
+include($$absolute_path(Payloads.pri, Payloads))
+include($$absolute_path(Protocols.pri, Protocols))
+include($$absolute_path(Utilities.pri, Utilities))
 
 
 #------------------------------------------------------------------------------#
-#                             Project files settings                           #
+#                            External dependencies                             #
 #------------------------------------------------------------------------------#
 
-include(Base/Base.pri)
-include(Client/Client.pri)
-include(Payloads/Payloads.pri)
-include(Protocols/Protocols.pri)
-include(Utilities/Utilities.pri)
+CURL_TARGET			=	curl
+CURL_FILENAME		=	$$find_static_library_filename($$CURL_TARGET)
+CURL_INCLUDE_PATH	=	$$find_include_path($$EXTERNAL_PATH, $$CURL_TARGET)
+CURL_LIBRARY_PATH	=	$$find_library_path($$EXTERNAL_PATH, $$CURL_TARGET)
+CURL_FILENAME_PATH	=	$$absolute_path($$CURL_FILENAME, $$CURL_LIBRARY_PATH)
 
 
 #------------------------------------------------------------------------------#
 #                          Include directories settings                        #
 #------------------------------------------------------------------------------#
 
-INCLUDEPATH		+=															\
-						$$EXTERNAL_PATH/curl-7.65.1/include					\
+INCLUDEPATH			+=														\
+						$$CURL_INCLUDE_PATH									\
 
 
-DEPENDPATH		+=															\
-						$$EXTERNAL_PATH/curl-7.65.1/include					\
+DEPENDPATH			+=														\
+						$$CURL_INCLUDE_PATH									\
 
 
 #------------------------------------------------------------------------------#
 #                           External libraries settings                        #
 #------------------------------------------------------------------------------#
 
-unix:!macx {
-	contains (QMAKE_HOST.arch, x86_64) {
-		CONFIG (debug, debug|release) {
-			PRE_TARGETDEPS		+=																	\
-										$$EXTERNAL_PATH/curl-7.65.1/lib/linux/x64/debug/libcurl.a	\
+PRE_TARGETDEPS		+=														\
+						$$CURL_FILENAME_PATH								\
 
-			LIBS				+=																	\
-										-L$$EXTERNAL_PATH/curl-7.65.1/lib/linux/x64/debug/ -lcurl	\
-		}
-		else {
-			PRE_TARGETDEPS		+=																	\
-										$$EXTERNAL_PATH/curl-7.65.1/lib/linux/x64/release/libcurl.a	\
+LIBS				+=														\
+						-L$$CURL_LIBRARY_PATH								\
 
-			LIBS				+=																	\
-										-L$$EXTERNAL_PATH/curl-7.65.1/lib/linux/x64/release/ -lcurl	\
-		}
-	}
-	else {
-		error("Currently, the project cannot be built under 32-bit architecture.")
-	}
-}
+LIBS				+=														\
+						-l$$CURL_TARGET										\

@@ -3,7 +3,7 @@
 /// Streaming Protocol (RTSP) implementation.
 /// \bug No known bugs.
 
-#include "RTSP.hpp"
+#include "AbstractRTSPClientBase.hpp"
 
 /// Contains classes and functions that implement Real Time Streaming Protocol
 /// (RTSP) library.
@@ -45,13 +45,13 @@ namespace RTSPLib {
 
 		/// Default constructor.
 		/// \details Initializes object fields.
-		RTSP::RTSP() : private_ { } {
+		RTSPClientBase::RTSPClientBase() : private_ { } {
 
 		}
 
 		/// Destructor.
 		/// \details Cleans resources.
-		RTSP::~RTSP() {
+		RTSPClientBase::~RTSPClientBase() {
 			close();
 		}
 
@@ -60,13 +60,13 @@ namespace RTSPLib {
 		/// \param[in]	url	RTSP connection URL.
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::open(const QByteArray& url) {
+		bool RTSPClientBase::open(const QByteArray& url) {
 			return isOpen() || contextOpen(url);
 		}
 
 		///
 		/// \details
-		void RTSP::close() {
+		void RTSPClientBase::close() {
 			contextClose();
 		}
 
@@ -74,35 +74,35 @@ namespace RTSPLib {
 		/// \details
 		/// \retval
 		/// \retval
-		bool RTSP::isOpen() const {
+		bool RTSPClientBase::isOpen() const {
 			return contextIsOpen();
 		}
 
 		///
 		/// \details
 		/// \return
-		QByteArray RTSP::getSDP() const {
+		QByteArray RTSPClientBase::getSDP() const {
 			return private_.sdpData_;
 		}
 
 		///
 		/// \details
 		/// \return
-		QByteArray RTSP::getUrl() const {
+		QByteArray RTSPClientBase::getUrl() const {
 			return private_.connectionUrl_;
 		}
 
 		///
 		/// \details
 		/// \return
-		QByteArray RTSP::getSession() const {
+		QByteArray RTSPClientBase::getSession() const {
 			return private_.currentSession_;
 		}
 
 		///
 		/// \details
 		/// \return
-		QByteArray RTSP::getUserAgent() const {
+		QByteArray RTSPClientBase::getUserAgent() const {
 			return private_.userAgent_;
 		}
 
@@ -111,35 +111,36 @@ namespace RTSPLib {
 		/// \param[in]	agent
 		/// \retval true on success.
 		/// \retval false on error.
-		void RTSP::setUserAgent(const QByteArray& userAgent) {
+		void RTSPClientBase::setUserAgent(const QByteArray& userAgent) {
 			private_.userAgent_ = userAgent;
 		}
 
 		///
 		/// \details
 		/// \return
-		QPair<qint64, qint64> RTSP::getTimeouts() const {
+		QPair<qint64, qint64> RTSPClientBase::getTimeouts() const {
 			return private_.operationTimeouts_;
 		}
 
 		///
 		/// \details
 		/// \param[in]	timeouts
-		void RTSP::setTimeouts(const QPair<qint64, qint64>& timeouts) {
+		void RTSPClientBase::setTimeouts(
+			const QPair<qint64, qint64>& timeouts) {
 			private_.operationTimeouts_ = timeouts;
 		}
 
 		///
 		/// \details
 		/// \return
-		QPair<QByteArray, QByteArray> RTSP::getCredentials() const {
+		QPair<QByteArray, QByteArray> RTSPClientBase::getCredentials() const {
 			return private_.userCredentials_;
 		}
 
 		///
 		/// \details
 		/// \param[in]	credentials
-		void RTSP::setCredentials(
+		void RTSPClientBase::setCredentials(
 			const QPair<QByteArray, QByteArray>& credentials) {
 			private_.userCredentials_ = credentials;
 		}
@@ -147,7 +148,7 @@ namespace RTSPLib {
 		/// Sends OPTIONS request.
 		/// \details Sends OPTIONS request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::OPTIONS() {
+		RTSPStatusCode RTSPClientBase::OPTIONS() {
 			auto request { CURL_RTSPREQ_OPTIONS };
 
 			if (!contextIsOpen() ||
@@ -183,7 +184,7 @@ namespace RTSPLib {
 		/// Sends DESCRIBE request.
 		/// \details Sends DESCRIBE request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::DESCRIBE() {
+		RTSPStatusCode RTSPClientBase::DESCRIBE() {
 			auto request { CURL_RTSPREQ_DESCRIBE };
 
 			if (!contextIsOpen() ||
@@ -225,11 +226,12 @@ namespace RTSPLib {
 
 		/// Sends SETUP request.
 		/// \details Sends SETUP request through the local context.
-		/// \param[in]	path	Media track path.
-		/// \param[in]	ports	Client ports that receive RTP and RTCP data.
-		/// \return RTSP status code.
-		RTSPStatusCode RTSP::SETUP_UDP(const QByteArray& path,
-									   const QPair<quint16, quint16>& ports) {
+		/// \param[in]	path		Media track path.
+		/// \param[in]	channels	Channels for RTP and RTCP data.
+		/// \return
+		RTSPStatusCode RTSPClientBase::SETUP(
+			const QByteArray& path,
+			const QPair<quint16, quint16>& channels) {
 
 			auto request { CURL_RTSPREQ_SETUP };
 
@@ -239,11 +241,13 @@ namespace RTSPLib {
 
 			auto track = private_.connectionUrl_ + '/' + trimUrl(path);
 
+			auto prefix = QByteArray("RTP/AVP/UDP;unicast;client_port=");
+
 			auto transport =
-				QByteArray("RTP/AVP/UDP;unicast;client_port=") +
-				QByteArray::number(ports.first) +
+				prefix +
+				QByteArray::number(channels.first) +
 				QByteArray("-") +
-				QByteArray::number(ports.second);
+				QByteArray::number(channels.second);
 
 			if (!contextSetUrl(track, transport)	||
 				!contextSetHeader()					||
@@ -272,7 +276,7 @@ namespace RTSPLib {
 		/// Sends PLAY request.
 		/// \details Sends PLAY request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::PLAY() {
+		RTSPStatusCode RTSPClientBase::PLAY() {
 			auto request { CURL_RTSPREQ_PLAY };
 
 			if (!contextIsOpen()					||
@@ -307,7 +311,7 @@ namespace RTSPLib {
 		/// Sends PAUSE request.
 		/// \details Sends PAUSE request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::PAUSE() {
+		RTSPStatusCode RTSPClientBase::PAUSE() {
 			auto request { CURL_RTSPREQ_PAUSE };
 
 			if (!contextIsOpen()					||
@@ -342,7 +346,7 @@ namespace RTSPLib {
 		/// Sends GET_PARAMETER request.
 		/// \details Sends GET_PARAMETER request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::GET_PARAMETER() {
+		RTSPStatusCode RTSPClientBase::GET_PARAMETER() {
 			auto request { CURL_RTSPREQ_GET_PARAMETER };
 
 			if (!contextIsOpen()					||
@@ -377,7 +381,7 @@ namespace RTSPLib {
 		/// Sends TEARDOWN request.
 		/// \details Sends TEARDOWN request through the local context.
 		/// \return RTSP status code.
-		RTSPStatusCode RTSP::TEARDOWN() {
+		RTSPStatusCode RTSPClientBase::TEARDOWN() {
 			auto request { CURL_RTSPREQ_TEARDOWN };
 
 			if (!contextIsOpen()					||
@@ -412,12 +416,44 @@ namespace RTSPLib {
 			return status;
 		}
 
+		RTSPStatusCode RTSPClientBase::RECEIVE() {
+			auto request { CURL_RTSPREQ_RECEIVE };
+
+			if (!contextIsOpen()					||
+				private_.currentSession_.isEmpty())
+				return RTSPStatusCode::Error;
+
+			if (!contextSetUrl()			||
+				!contextSetHeader()			||
+				!contextSetSession()		||
+				!contextSetTimeouts()		||
+				!contextSetCredentials()	||
+				!contextSetMiscellaneous()	/*||
+				!contextSetCallback(CURLOPT_INTERLEAVEFUNCTION,
+									callbackDataInterleaved,
+									&private_)*/) {
+				contextReset();
+				return RTSPStatusCode::Error;
+			}
+
+			while (true) {
+
+				contextPerform(request);
+			}
+
+			private_.statusCode_ = RTSPStatusCode::Error;
+
+			//contextReset();
+
+			return RTSPStatusCode::Error;
+		}
+
 		///
 		/// \details
 		/// \param[in]	url
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextOpen(const QByteArray& url) {
+		bool RTSPClientBase::contextOpen(const QByteArray& url) {
 			if (!globalContext_.isInitialized() || url.isEmpty())
 				return false;
 
@@ -431,7 +467,7 @@ namespace RTSPLib {
 
 		///
 		/// \details
-		void RTSP::contextClose() {
+		void RTSPClientBase::contextClose() {
 			private_.statusCode_		= RTSPStatusCode::Error;
 			private_.connectionUrl_		= { };
 			private_.userAgent_			= { };
@@ -451,7 +487,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval
 		/// \retval
-		bool RTSP::contextIsOpen() const {
+		bool RTSPClientBase::contextIsOpen() const {
 			return private_.localContext_ &&
 				   !private_.connectionUrl_.isEmpty();
 		}
@@ -461,7 +497,7 @@ namespace RTSPLib {
 		/// \param[in]	request
 		/// \retval
 		/// \retval
-		bool RTSP::contextIsSupported(qint64 request) const {
+		bool RTSPClientBase::contextIsSupported(qint64 request) const {
 			return request == CURL_RTSPREQ_OPTIONS ||
 				   private_.supportedRequests_.contains(request);
 		}
@@ -473,9 +509,9 @@ namespace RTSPLib {
 		/// \param[in]	data
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetCallback(CURLoption option,
-									  callback_t callback,
-									  void* data) {
+		bool RTSPClientBase::contextSetCallback(CURLoption option,
+												callback_t callback,
+												void* data) {
 
 			CURLoption dataOption;
 
@@ -485,6 +521,9 @@ namespace RTSPLib {
 				break;
 			case CURLOPT_WRITEFUNCTION:
 				dataOption = CURLOPT_WRITEDATA;
+				break;
+			case CURLOPT_INTERLEAVEFUNCTION:
+				dataOption = CURLOPT_INTERLEAVEDATA;
 				break;
 			default: return false;
 			}
@@ -504,8 +543,8 @@ namespace RTSPLib {
 		/// \param[in]	transport
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetUrl(const QByteArray& track,
-								 const QByteArray& transport) {
+		bool RTSPClientBase::contextSetUrl(const QByteArray& track,
+										   const QByteArray& transport) {
 
 			return curl_easy_setopt(private_.localContext_,
 									CURLOPT_URL,
@@ -529,7 +568,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetHeader() {
+		bool RTSPClientBase::contextSetHeader() {
 			return private_.userAgent_.isEmpty() ||
 				   curl_easy_setopt(private_.localContext_,
 									CURLOPT_USERAGENT,
@@ -541,7 +580,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetSession() {
+		bool RTSPClientBase::contextSetSession() {
 			return private_.currentSession_.isEmpty() ||
 				   curl_easy_setopt(private_.localContext_,
 									CURLOPT_RTSP_SESSION_ID,
@@ -553,7 +592,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetTimeouts() {
+		bool RTSPClientBase::contextSetTimeouts() {
 			return curl_easy_setopt(private_.localContext_,
 									CURLOPT_CONNECTTIMEOUT_MS,
 									private_.operationTimeouts_.first >= 0
@@ -571,7 +610,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetCredentials() {
+		bool RTSPClientBase::contextSetCredentials() {
 			return (private_.userCredentials_.second.isEmpty())				||
 
 				   (!private_.userCredentials_.first.isEmpty()			&&
@@ -595,7 +634,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextSetMiscellaneous() {
+		bool RTSPClientBase::contextSetMiscellaneous() {
 #ifdef QT_DEBUG
 
 			curl_easy_setopt(private_.localContext_,
@@ -613,7 +652,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextResetConnection() {
+		bool RTSPClientBase::contextResetConnection() {
 			return curl_easy_setopt(private_.localContext_,
 									CURLOPT_FORBID_REUSE,
 									1L) == CURLE_OK;
@@ -623,7 +662,7 @@ namespace RTSPLib {
 		/// \details
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextResetSequence() {
+		bool RTSPClientBase::contextResetSequence() {
 			return curl_easy_setopt(private_.localContext_,
 									CURLOPT_RTSP_CLIENT_CSEQ,
 									1L) == CURLE_OK;
@@ -631,7 +670,7 @@ namespace RTSPLib {
 
 		///
 		/// \details
-		void RTSP::contextReset() {
+		void RTSPClientBase::contextReset() {
 			curl_easy_reset(private_.localContext_);
 		}
 
@@ -640,7 +679,7 @@ namespace RTSPLib {
 		/// \param[in]	request
 		/// \retval true on success.
 		/// \retval false on error.
-		bool RTSP::contextPerform(qint64 request) {
+		bool RTSPClientBase::contextPerform(qint64 request) {
 			if (curl_easy_setopt(private_.localContext_,
 								 CURLOPT_RTSP_REQUEST,
 								 request) != CURLE_OK	||
@@ -665,7 +704,7 @@ namespace RTSPLib {
 		/// \details
 		/// \param[in]	url
 		/// \return
-		QByteArray RTSP::trimUrl(const QByteArray& url) {
+		QByteArray RTSPClientBase::trimUrl(const QByteArray& url) {
 			int begin = 0, end = 0;
 
 			for (auto it = url.cbegin(); it != url.cend(); ++it) {
@@ -685,7 +724,9 @@ namespace RTSPLib {
 		/// \details
 		/// \param[in]	code
 		/// \return
-		RTSPStatusCode RTSP::validateStatus(RTSPStatusCode statusCode) {
+		RTSPStatusCode RTSPClientBase::validateStatus(
+			RTSPStatusCode statusCode) {
+
 			switch (statusCode) {
 			case RTSPStatusCode::Error:
 			case RTSPStatusCode::Continue:
@@ -752,13 +793,13 @@ namespace RTSPLib {
 		/// \param[in]	size	Data size.
 		/// \param[in]	user	User-defined data.
 		/// \return Actual read size.
-		size_t RTSP::callbackHeaderAll(char* data,
-									   size_t n,
-									   size_t size,
-									   void* user) {
+		size_t RTSPClientBase::callbackHeaderAll(char* data,
+												 size_t n,
+												 size_t size,
+												 void* user) {
 
 			auto read = n * size;
-			auto object = static_cast<RTSPPrivate*>(user);
+			auto object = static_cast<RTSPClientBasePrivate*>(user);
 
 			if (data && (read > 0) && object) {
 				auto header = QByteArray::fromRawData(data, read);
@@ -789,13 +830,13 @@ namespace RTSPLib {
 		/// \param[in]	size	Data size.
 		/// \param[in]	user	User-defined data.
 		/// \return Actual read size.
-		size_t RTSP::callbackHeaderOPTIONS(char* data,
-										   size_t n,
-										   size_t size,
-										   void* user) {
+		size_t RTSPClientBase::callbackHeaderOPTIONS(char* data,
+													 size_t n,
+													 size_t size,
+													 void* user) {
 
 			auto read = n * size;
-			auto object = static_cast<RTSPPrivate*>(user);
+			auto object = static_cast<RTSPClientBasePrivate*>(user);
 
 			if (data && (read > 0) && object) {
 				auto header = QByteArray::fromRawData(data, read);
@@ -843,16 +884,40 @@ namespace RTSPLib {
 		/// \param[in]	size	Data size.
 		/// \param[in]	user	User-defined data.
 		/// \return Actual read size.
-		size_t RTSP::callbackBodyDESCRIBE(char* data,
-										  size_t n,
-										  size_t size,
-										  void* user) {
+		size_t RTSPClientBase::callbackBodyDESCRIBE(char* data,
+													size_t n,
+													size_t size,
+													void* user) {
 
 			auto read = n * size;
-			auto object = static_cast<RTSPPrivate*>(user);
+			auto object = static_cast<RTSPClientBasePrivate*>(user);
 
 			if (data && (read > 0) && object) {
 				object->sdpData_ = QByteArray(data, read);
+			}
+
+			return read;
+		}
+
+		/// Performs an action when receiving RTSP interleaved data.
+		/// \details
+		/// \param[in]	data	Data pointer.
+		/// \param[in]	n		Number of buffers.
+		/// \param[in]	size	Data size.
+		/// \param[in]	user	User-defined data.
+		/// \return Actual read size.
+		size_t RTSPClientBase::callbackDataInterleaved(char* data,
+													   size_t n,
+													   size_t size,
+													   void* user) {
+
+			auto read = n * size;
+			auto object = nullptr;
+
+			qDebug() << read;
+
+			if (data && (read > 0) && object) {
+
 			}
 
 			return read;

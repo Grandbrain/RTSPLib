@@ -4,7 +4,7 @@
 /// \bug No known bugs.
 
 #include "RTSPClient.hpp"
-#include "Protocols/RTSP.hpp"
+#include "Protocols/RTSP/AbstractRTSPClientBase.hpp"
 
 #include <QUdpSocket>
 
@@ -34,7 +34,7 @@ namespace RTSPLib {
 
 			/// RTSP context.
 			/// \details RTSP context for RTP session management.
-			RTSP context_;
+			RTSPClientBase context_;
 		};
 
 		/// Default constructor.
@@ -61,7 +61,8 @@ namespace RTSPLib {
 		bool RTSPClient::open(const QUrl& url) {
 			close();
 
-			private_->context_.setUserAgent("RTSPClient");
+			//private_->context_.setUserAgent("RTSPClient");
+			//private_->context_.setCredentials({"admin", "741852369"});
 
 			if (!url.isValid()										||
 				!private_->context_.open(url.toEncoded())			||
@@ -94,10 +95,8 @@ namespace RTSPLib {
 			reset();
 
 			if (!path.isValid()												||
-				private_->context_.SETUP_UDP(path.toEncoded(), ports) !=
-					RTSPStatusCode::Ok										||
-				!private_->rtp_.bind(ports.first)							||
-				!private_->rtcp_.bind(ports.second)) {
+				private_->context_.SETUP(path.toEncoded(), ports) !=
+					RTSPStatusCode::Ok										) {
 				reset();
 				return false;
 			}
@@ -140,7 +139,9 @@ namespace RTSPLib {
 		/// \retval true on success.
 		/// \retval false on error.
 		bool RTSPClient::play() {
-			return private_->context_.PLAY() == RTSPStatusCode::Ok;
+			private_->context_.PLAY();
+
+			return true;
 		}
 
 		/// Pauses playback of the media stream.
@@ -181,7 +182,7 @@ namespace RTSPLib {
 				if (private_->rtp_.readDatagram(data.data(), data.size()) !=
 					data.size()) continue;
 
-				emit onData(data);
+				qDebug() << data.size();
 			}
 		}
 

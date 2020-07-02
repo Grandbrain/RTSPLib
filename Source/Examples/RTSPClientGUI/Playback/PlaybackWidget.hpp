@@ -6,7 +6,11 @@
 #ifndef PLAYBACKWIDGET_HPP
 #define PLAYBACKWIDGET_HPP
 
-#include "PlaybackCommon.hpp"
+#include <QOpenGLBuffer>
+#include <QOpenGLTexture>
+#include <QOpenGLWidget>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLFunctions>
 
 ///
 namespace Player {
@@ -31,6 +35,8 @@ namespace Player {
 			virtual ~PlaybackWidget();
 
 		public:
+
+			void setImage(const QImage& image);
 
 
 		protected:

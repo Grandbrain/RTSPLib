@@ -3,8 +3,9 @@
 #------------------------------------------------------------------------------#
 
 HEADERS			+=															\
-						$$PWD/H.264Decoder.hpp								\
+						$$PWD/AudioDecoder.hpp								\
+						$$PWD/VideoDecoder.hpp								\
 
 SOURCES			+=															\
-						$$PWD/H.264Decoder.cpp								\
+						$$PWD/Decoder.cpp									\
 

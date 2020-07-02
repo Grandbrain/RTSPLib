@@ -3,9 +3,9 @@
 #------------------------------------------------------------------------------#
 
 HEADERS			+=															\
-						$$PWD/PlaybackCommon.hpp							\
+	$$PWD/PlaybackVideo.hpp \
 						$$PWD/PlaybackWidget.hpp							\
 
 SOURCES			+=															\
-						$$PWD/PlaybackCommon.cpp							\
+	$$PWD/PlaybackVideo.cpp \
 						$$PWD/PlaybackWidget.cpp							\

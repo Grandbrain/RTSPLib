@@ -18,11 +18,9 @@ int main(int argc, char *argv[]) {
 	RTSPLib::RTSPClient::RTSPClient client;
 	QPair<quint16, quint16> ports { 50000, 50001 };
 	QUrl stream { "track1" };
-	QUrl url {"rtsp://192.168.11.20:554/udpstream_ch1_stream2_mjpg"};
+	QUrl url {"rtsp://192.168.11.20:554/udpstream_ch1_stream1_h264"};
 
 	client.open(url);
-	client.setup(stream, ports);
-	client.reset();
 	client.setup(stream, ports);
 	client.play();
 
